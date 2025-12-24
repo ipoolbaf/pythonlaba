@@ -1,8 +1,8 @@
 import sys
 
-from PyQt5.QtCore import QItemSelection
+from PyQt5.QtCore import QItemSelection, QSize
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QSpinBox, QLineEdit, QPushButton, QWidget, \
-    QComboBox, QGridLayout, QLabel
+    QComboBox, QGridLayout, QLabel, QGraphicsRectItem, QSizePolicy
 
 
 class MainWindow(QMainWindow):
@@ -23,10 +23,12 @@ class MainWindow(QMainWindow):
         layout.addWidget(QLabel("Аренда торговой точки, тыс. руб.:"), 3, 0)
         layout.addWidget(QLineEdit(), 3, 1)
         layout.addWidget(QLabel("Заработная плата продавцам, тыс. руб.:"), 4, 0)
-        layout.addWidget(QLineEdit(), 4,1)
+        self.zp = QLineEdit("0")
+        layout.addWidget(self.zp, 4,1)
         self.btn1 = QPushButton("Страховые взносы, тыс. руб.")
         layout.addWidget(self.btn1, 5, 0)
-        layout.addWidget(QLineEdit(), 5, 1)
+        self.stvnz = QLineEdit()
+        layout.addWidget(self.stvnz, 5, 1)
         layout.addWidget(QLabel("Маркетинговые расходы, тыс. руб.:"), 6, 0)
         layout.addWidget(QLineEdit(), 6, 1)
         self.btn2 = QPushButton("Уровень наценки, %")
@@ -37,12 +39,24 @@ class MainWindow(QMainWindow):
         layout.addWidget(QLineEdit(), 8, 1)
         self.btn4 = QPushButton("Сравнение цен")
         layout.addWidget(self.btn4, 9, 0)
-        layout.addWidget(QWidget(), 10, 0)
+        self.graph = QWidget()
+        self.graph.resize(800, 600)
+        layout.addWidget(self.graph, 10, 0, 1, 2)
 
+        #(self.zp is float)
+        if self.btn1:
+            self.btn1.clicked.connect(self.strahvznos)
 
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
+
+    def strahvznos(self):
+        stra = float(self.zp.text()) * 0.3
+        self.stvnz.setText(str(stra))
+
+
+
 
 app = QApplication(sys.argv)
 window = MainWindow()
