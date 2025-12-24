@@ -17,11 +17,14 @@ class MainWindow(QMainWindow):
         self.cb.addItems(["ячмень", "озимая пшеница", "подсолнечник"])
         layout.addWidget(self.cb, 0, 1)
         layout.addWidget(QLabel("Производственная себестоимость 1 ц, тыс. руб.:"), 1, 0)
-        layout.addWidget(QLineEdit(), 1, 1)
+        self.prseb = QLineEdit("0")
+        layout.addWidget(self.prseb, 1, 1)
         layout.addWidget(QLabel("Объем реализации, ц:"), 2, 0)
-        layout.addWidget(QLineEdit(), 2, 1)
+        self.objem = QLineEdit("0")
+        layout.addWidget(self.objem, 2, 1)
         layout.addWidget(QLabel("Аренда торговой точки, тыс. руб.:"), 3, 0)
-        layout.addWidget(QLineEdit(), 3, 1)
+        self.arenda = QLineEdit("0")
+        layout.addWidget(self.arenda, 3, 1)
         layout.addWidget(QLabel("Заработная плата продавцам, тыс. руб.:"), 4, 0)
         self.zp = QLineEdit("0")
         layout.addWidget(self.zp, 4,1)
@@ -30,13 +33,16 @@ class MainWindow(QMainWindow):
         self.stvnz = QLineEdit()
         layout.addWidget(self.stvnz, 5, 1)
         layout.addWidget(QLabel("Маркетинговые расходы, тыс. руб.:"), 6, 0)
-        layout.addWidget(QLineEdit(), 6, 1)
+        self.mark = QLineEdit("0")
+        layout.addWidget(self.mark, 6, 1)
         self.btn2 = QPushButton("Уровень наценки, %")
         layout.addWidget(self.btn2, 7, 0)
-        layout.addWidget(QLineEdit(), 7, 1)
+        self.uroven = QLineEdit()
+        layout.addWidget(self.uroven, 7, 1)
         self.btn3 = QPushButton("Цена реализации")
         layout.addWidget(self.btn3, 8, 0)
-        layout.addWidget(QLineEdit(), 8, 1)
+        self.tsenlabel = QLineEdit("0")
+        layout.addWidget(self.tsenlabel, 8, 1)
         self.btn4 = QPushButton("Сравнение цен")
         layout.addWidget(self.btn4, 9, 0)
         self.graph = QWidget()
@@ -46,15 +52,49 @@ class MainWindow(QMainWindow):
         #(self.zp is float)
         if self.btn1:
             self.btn1.clicked.connect(self.strahvznos)
+        if self.btn2:
+            self.btn2.clicked.connect(self.urnats)
+        if self.btn3:
+            self.btn3.clicked.connect(self.tsenareal)
 
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
     def strahvznos(self):
-        stra = float(self.zp.text()) * 0.3
-        self.stvnz.setText(str(stra))
+        try:
+            stra = float(self.zp.text()) * 0.3
+            self.stvnz.setText(str(stra))
+        except ValueError:
+            self.stvnz.setText("ошибка")
 
+    #Зачем эта функция? Транспортные расходы в задаче не используются
+    def transport(self):
+        try:
+            tran = float(self.objem.text()) * 0.1
+        except ValueError:
+            print("ошибка")
+
+    def urnats(self):
+        try:
+            if self.cb.currentIndex() == 0:
+                ur = 50
+            if self.cb.currentIndex() == 1:
+                ur = 35
+            if self.cb.currentIndex() == 2:
+                ur = 45
+            self.uroven.setText(str(ur))
+        except ValueError:
+            print("ошибка")
+
+    def tsenareal(self):
+        try:
+            tsena = (float(self.prseb.text()) +
+                     (float(self.arenda.text()) + float(self.zp.text())+ float(self.stvnz.text()) + float(self.mark.text()))
+                     * (1 + float(self.uroven.text())/100))
+            self.tsenlabel.setText(str(tsena))
+        except ValueError:
+            self.tsenlabel.setText("ошибка")
 
 
 
