@@ -1,9 +1,14 @@
 import sys
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QLineEdit, QPushButton, QWidget, \
+    QComboBox, QGridLayout, QLabel
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
+from matplotlib.figure import Figure
 
-from PyQt5.QtCore import QItemSelection, QSize
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QSpinBox, QLineEdit, QPushButton, QWidget, \
-    QComboBox, QGridLayout, QLabel, QGraphicsRectItem, QSizePolicy
-
+class MplCanvas(FigureCanvasQTAgg):
+    def __init__(self, parent='None', width=1, height=1, dpi=100):
+        fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = fig.add_subplot(111)
+        super().__init__(fig)
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -11,6 +16,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Определение себестоимости продукции растениеводства")
         layout = QGridLayout()
+        self.setFixedHeight(800)
 
         layout.addWidget(QLabel("Тип культуры:"), 0, 0)
         self.cb = QComboBox()
@@ -49,13 +55,14 @@ class MainWindow(QMainWindow):
         self.graph.resize(800, 600)
         layout.addWidget(self.graph, 10, 0, 1, 2)
 
-        #(self.zp is float)
         if self.btn1:
             self.btn1.clicked.connect(self.strahvznos)
         if self.btn2:
             self.btn2.clicked.connect(self.urnats)
         if self.btn3:
             self.btn3.clicked.connect(self.tsenareal)
+        if self.btn4:
+            self.btn4.clicked.connect(self.graphic)
 
         widget = QWidget()
         widget.setLayout(layout)
@@ -96,7 +103,26 @@ class MainWindow(QMainWindow):
         except ValueError:
             self.tsenlabel.setText("ошибка")
 
+    def graphic(self):
+        try:
+            if self.graph.layout():
+                while self.graph.layout().count():
+                    item = self.graph.layout().takeAt(0)
+                    widget = item.widget()
+                    if widget:
+                        widget.deleteLater()
+            else:
+                layout = QVBoxLayout(self.graph)
+                self.graph.setLayout(layout)
 
+            sc = MplCanvas(self)
+            x = ['Фактическая цена', 'Плановая цена']
+            y = [float(self.tsenlabel.text()), 100] #я не понял, как плановую расчитать
+            sc.axes.bar(x, y, width=0.8, color=['blue', 'red'])
+            sc.draw()
+            self.graph.layout().addWidget(sc)
+        except Exception:
+            print("Провал")
 
 app = QApplication(sys.argv)
 window = MainWindow()
